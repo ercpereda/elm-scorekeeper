@@ -1,11 +1,13 @@
 module Main exposing (..)
 
 import Html exposing (..)
+import Html.Attributes exposing (..)
+import Html.Events exposing (..)
 
 -- model
 
 type alias Model =
-  { palyers: List Player,
+  { players: List Player
   , name: String
   , playerId: Maybe Int
   , plays: List Play
@@ -32,8 +34,54 @@ initModel =
   , plays = []
   }
 
+-- update
+
+type Msg
+  = Edit Player
+  | Score Player Int
+  | Input String
+  | Save
+  | Cancel
+  | DeletePlayer Play
+
+update : Msg -> Model -> Model
+update msg model =
+  case msg of
+    Input name ->
+      { model | name = name }
+
+    _ ->
+      model
+
+-- view
+
+view : Model -> Html Msg
+view model =
+  div [ class "scoreboard" ]
+      [ h1 [] [ text "Score Keeper" ]
+      , playerForm model
+      , p [] [ text (toString model) ]
+      ]
+
+playerForm : Model -> Html Msg
+playerForm model =
+  Html.form  [ onSubmit Save ]
+        [ input
+            [ type_ "text"
+            , placeholder "Add/Edit Player..."
+            , onInput Input
+            , value model.name
+            ]
+            []
+        , button [ type_ "submit" ] [ text "Save" ]
+        , button [ type_ "button", onClick Cancel ] [ text "Cancel" ]
+        ]
 
 
-main : Html msg
+main : Program Never Model Msg
 main = 
-  text "Hello World!"
+  Html.beginnerProgram
+    { model = initModel
+    , view = view
+    , update = update
+    }
